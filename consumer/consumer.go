@@ -9,7 +9,6 @@ import (
 )
 
 func main() {
-	msg_number := flag.Int("number", 10000, "Exit after receiving this number of messages")
 	broker_host := flag.String("host", "localhost", "Kafka broker host")
 	broker_port := flag.Int("port", 9093, "Kafka broker port")
 	topic := flag.String("topic", "my-topic", "Kafka topic to send messages to")
@@ -36,9 +35,13 @@ func main() {
 	}
 
 	logger.Println("Start")
-	for i := 0; i < *msg_number; i++ {
-		_ = <-partitionConsumer.Messages()
+	i := 0
+	for ; ; i++ {
+		msg := <-partitionConsumer.Messages()
+		if string(msg.Value) == "THE END" {
+			break
+		}
 	}
-	logger.Println("Finish")
+	logger.Printf("Finished. Received %d messages.\n", i)
 
 }
