@@ -1,11 +1,11 @@
 #!/bin/bash
 NUM_MESSAGES=1000000
 
-consumer/consumer -port 9092  &
+consumer/consumer -brokers localhost:9092,localhost:9093,localhost:9094  &
 CONSUMER_PID=$!
 sleep 1
 START=$(date +%s)
-producer/producer -port 9093 -size 100 -number $NUM_MESSAGES  &
+producer/producer -brokers localhost:9092,localhost:9093,localhost:9094 -size 100 -threads 50 -number $NUM_MESSAGES  &
 iostat -y /dev/sda 30 &
 IOSTAT_PID=$!
 wait $CONSUMER_PID

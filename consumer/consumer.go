@@ -2,23 +2,20 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/Shopify/sarama"
 	"log"
 	"os"
+	"strings"
 )
 
 func main() {
-	broker_host := flag.String("host", "localhost", "Kafka broker host")
-	broker_port := flag.Int("port", 9093, "Kafka broker port")
+	brokers := flag.String("brokers", "localhost:9093", "Comma separated kafka brokers list")
 	topic := flag.String("topic", "my-topic", "Kafka topic to send messages to")
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "consumer ", log.Lmicroseconds)
 
-	broker := fmt.Sprintf("%s:%d", *broker_host, *broker_port)
-
-	consumer, err := sarama.NewConsumer([]string{broker}, nil)
+	consumer, err := sarama.NewConsumer(strings.Split(*brokers, ","), nil)
 	if err != nil {
 		logger.Panicln(err)
 	}

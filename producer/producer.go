@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/Shopify/sarama"
 	"log"
 	"math/rand"
 	"os"
+	"strings"
 )
 
 func randomString(n int) string {
@@ -34,19 +34,20 @@ func main() {
 	msg_number := flag.Int("number", 10000, "Number of messages")
 	msg_size := flag.Int("size", 1000, "Message size")
 	num_threads := flag.Int("threads", 20, "Number of threads (goroutines)")
-	broker_host := flag.String("host", "localhost", "Kafka broker host")
-	broker_port := flag.Int("port", 9093, "Kafka broker port")
+	brokers := flag.String("brokers", "localhost:9093", "Comma separated kafka brokers list")
 	topic := flag.String("topic", "my-topic", "Kafka topic to send messages to")
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "producer ", log.Lmicroseconds)
 
-	broker := fmt.Sprintf("%s:%d", *broker_host, *broker_port)
 	//logger.Println(broker)
 	cfg := sarama.NewConfig()
 	//Wait for replication
 	cfg.Producer.RequiredAcks = -1
-	producer, err := sarama.NewSyncProducer([]string{broker}, cfg)
+	cfg.Producer.Flush.Frequency = 333
+	cfg.Producer.Flush.Messages = 1000
+	cfg.Producer.Flush.MaxMessages = 3000
+	producer, err := sarama.NewSyncProducer(strings.Split(*brokers, ","), cfg)
 	if err != nil {
 		logger.Fatalln(err)
 	}
